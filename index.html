@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Moon is in Gemini</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;0,6..96,500;0,6..96,600;1,6..96,400;1,6..96,500&family=Bodoni+Moda+SC:ital,opsz,wght@0,6..96,400;0,6..96,500;0,6..96,600;1,6..96,400&family=Pinyon+Script&family=Roboto:ital,wght@0,100;0,200;0,300;1,100;1,200;1,300&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#FFFEEE;
+    --ink:#262019;
+    --ink-soft:#4a4034;
+    --muted:#8c8166;
+    --hair:rgba(60,48,28,0.22);
+    --ease:cubic-bezier(.22,.61,.36,1);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;background:var(--paper);}
+  body{
+    font-family:'Roboto',sans-serif;
+    color:var(--ink);
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+  }
+  body::before{
+    content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
+    background:
+      radial-gradient(120% 90% at 50% 42%, rgba(255,253,235,0.55) 0%, rgba(255,254,238,0) 55%),
+      radial-gradient(140% 120% at 50% 100%, rgba(86,70,40,0.08) 0%, rgba(255,254,238,0) 60%);
+  }
+  #root{position:relative;z-index:1;}
+  .stage{position:relative;width:100%;min-height:100vh;min-height:100dvh;overflow:hidden;}
+
+  /* ---- collage ---- */
+  .collage-item{position:absolute;will-change:transform;}
+  .collage-img{
+    display:block;width:100%;height:auto;
+    box-shadow:0 10px 34px rgba(46,34,12,0.18), 0 2px 6px rgba(46,34,12,0.12);
+    backface-visibility:hidden;-webkit-backface-visibility:hidden;
+  }
+
+  /* ---- center column (two overlapping states, centered) ---- */
+  .center-stage{
+    position:relative;z-index:5;
+    width:100%;height:100vh;height:100dvh;
+    display:grid;place-items:center;
+    padding:0 24px;
+  }
+  .state-layer{
+    grid-area:1/1;
+    width:min(560px,88vw);
+    display:flex;flex-direction:column;align-items:center;
+    text-align:center;
+  }
+  /* landing distributes vertically: date near top, button near bottom,
+     moon + theme centred between — with breathable top/bottom margins */
+  .landing-layer{
+    height:100vh;height:100dvh;
+    justify-content:space-between;
+    padding:clamp(54px,9vh,112px) 0;
+  }
+  /* pattern layer also fills the frame so its footer links stick to the bottom,
+     mirroring the landing button */
+  .pattern-layer{
+    height:100vh;height:100dvh;
+    justify-content:flex-start;
+    padding:clamp(54px,9vh,112px) 0;
+  }
+  .landing-mid{display:flex;flex-direction:column;align-items:center;gap:clamp(30px,6vh,70px);}
+  .eyebrow{
+    font-family:'Roboto',sans-serif;font-weight:200;font-style:normal;
+    font-size:14px;letter-spacing:.04em;color:var(--muted);white-space:nowrap;
+    margin-bottom:14px;
+  }
+  .datetime{
+    font-family:'Bodoni Moda SC','Bodoni Moda',serif;font-weight:400;
+    font-variant-caps:small-caps;
+    font-size:18px;letter-spacing:.07em;color:var(--ink);
+  }
+  .moon-line{
+    margin:0;font-family:'Bodoni Moda SC','Bodoni Moda',serif;font-weight:400;
+    font-variant-caps:small-caps;
+    font-size:clamp(28px,3.4vw,42px);letter-spacing:.06em;color:var(--ink);
+    line-height:1;white-space:nowrap;
+  }
+  .script{font-family:'Pinyon Script',cursive;font-variant-caps:normal;text-transform:none;letter-spacing:0;}
+  .moon-line .script{font-size:1.7em;line-height:0.6;padding:0 .06em;}
+  .sign{
+    font-family:'Pinyon Script',cursive;
+    font-size:clamp(82px,10vw,128px);line-height:0.95;color:var(--ink);
+    margin-top:8px;
+  }
+  .theme{
+    font-family:'Bodoni Moda SC','Bodoni Moda',serif;font-weight:500;
+    font-variant-caps:small-caps;
+    font-size:24px;letter-spacing:.10em;color:var(--ink);
+  }
+  /* mixed-type wordmark, shared by the pill button and the pattern title */
+  .tp-caps{font-family:'Bodoni Moda SC','Bodoni Moda',serif;font-weight:500;
+    font-variant-caps:small-caps;letter-spacing:.11em;}
+  .tp-script{font-family:'Pinyon Script',cursive;letter-spacing:0;}
+
+  /* ---- landing: track-the-patterns teardrop pill ---- */
+  .track-pill{
+    appearance:none;cursor:pointer;
+    position:relative;overflow:hidden;
+    display:inline-flex;align-items:baseline;gap:.42em;
+    background:rgba(255,252,238,0.35);
+    border:1px solid rgba(60,48,28,0.20);
+    border-radius:115px 50px 50px 50px;
+    padding:20px 46px;color:var(--ink);
+    transition:background .4s var(--ease),border-color .5s var(--ease),transform .25s var(--ease),filter .6s var(--ease);
+  }
+  /* soft moonlight rising off the crescent edge, rippling like water on hover */
+  .track-pill::before{
+    content:"";position:absolute;left:-30%;right:-30%;bottom:-2px;height:62%;
+    background:radial-gradient(60% 100% at 50% 100%, rgba(255,249,230,0.28), rgba(255,249,230,0) 72%);
+    opacity:0;pointer-events:none;transition:opacity .6s var(--ease);
+  }
+  .track-pill .tp-caps{font-size:21px;line-height:0.6;}
+  .track-pill .tp-script{font-size:30px;line-height:0.6;position:relative;top:3px;}
+  .track-pill:hover{
+    border-color:rgba(255,252,238,1) !important;
+    animation:moonBreath 3.6s ease-in-out infinite;
+  }
+  .track-pill:hover::before{opacity:1;animation:waterGlow 3.6s ease-in-out infinite;}
+  .track-pill:active{transform:translateY(0.5px);}
+  @keyframes moonBreath{
+    0%,100%{filter:drop-shadow(1px 4px 13px rgba(255,247,224,0.42));}
+    50%{filter:drop-shadow(2px 8px 26px rgba(255,252,238,0.85));}
+  }
+  @keyframes waterGlow{0%,100%{opacity:.45;}50%{opacity:1;}}
+  /* click: a ring of light spreads across the pill like a ripple on water */
+  .pill-ripple{
+    position:absolute;left:50%;top:60%;width:12px;height:12px;border-radius:50%;
+    transform:translate(-50%,-50%) scale(0);
+    background:radial-gradient(circle, rgba(255,250,232,0.55) 0%, rgba(255,250,232,0) 70%);
+    opacity:0;pointer-events:none;
+  }
+  .track-pill.is-pressing{border-color:rgba(255,251,236,1) !important;}
+  .track-pill.is-pressing .pill-ripple{animation:pillRipple .62s var(--ease) forwards;}
+  @keyframes pillRipple{
+    0%{transform:translate(-50%,-50%) scale(0);opacity:.85;}
+    100%{transform:translate(-50%,-50%) scale(42);opacity:0;}
+  }
+  /* soft blurred bloom on the edges only — makes the border look like it's glowing */
+  .pill-bloom{
+    position:absolute;inset:0;border-radius:inherit;padding:1.8px;
+    pointer-events:none;opacity:0;transition:opacity .5s var(--ease);
+    background:radial-gradient(120px circle at var(--mx,50%) var(--my,50%),
+      rgba(255,253,240,0.95), rgba(255,249,228,0) 60%);
+    -webkit-mask:linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite:xor;mask-composite:exclude;
+    filter:blur(4px);
+  }
+  /* cursor-following border glow — a bright cream ring that lights the edges where you point */
+  .pill-glow{
+    position:absolute;inset:0;border-radius:inherit;padding:1.8px;
+    pointer-events:none;opacity:0;transition:opacity .5s var(--ease);
+    background:radial-gradient(110px circle at var(--mx,50%) var(--my,50%),
+      rgba(255,254,245,1), rgba(255,249,228,0.55) 32%, rgba(255,249,228,0) 60%);
+    -webkit-mask:linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite:xor;mask-composite:exclude;
+  }
+  .track-pill:hover .pill-glow,.track-pill.is-pressing .pill-glow{opacity:1;}
+  .track-pill:hover .pill-bloom,.track-pill.is-pressing .pill-bloom{opacity:.85;}
+  /* a small bright shine that endlessly travels around the border — a quiet "click me" cue */
+  @property --shine-angle{syntax:'<angle>';inherits:false;initial-value:0deg;}
+  .pill-trace{
+    position:absolute;inset:0;border-radius:inherit;padding:1.8px;
+    pointer-events:none;
+    background:conic-gradient(from var(--shine-angle) at 50% 50%,
+      rgba(255,255,255,0) 0deg,
+      rgba(255,255,255,0) 58deg,
+      rgba(255,252,245,0.7) 74deg,
+      rgba(255,255,255,1) 88deg,
+      rgba(255,252,245,0.7) 102deg,
+      rgba(255,255,255,0) 118deg,
+      rgba(255,255,255,0) 360deg);
+    -webkit-mask:linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite:xor;mask-composite:exclude;
+    filter:drop-shadow(0 0 5px rgba(255,255,255,0.95)) drop-shadow(0 0 2px rgba(255,255,255,1));
+    animation:shineCircle 3.4s linear infinite;
+  }
+  @keyframes shineCircle{to{--shine-angle:360deg;}}
+  @media (prefers-reduced-motion:reduce){
+    .track-pill:hover,.track-pill:hover::before,.track-pill.is-pressing .pill-ripple,.pill-trace{animation:none;}
+  }
+
+  /* ---- pattern state ---- */
+  .pat-title{display:inline-flex;align-items:baseline;gap:.4em;}
+  .pat-title .tp-caps{font-size:23px;}
+  .pat-title .tp-script{font-size:33px;line-height:0.6;position:relative;top:3px;}
+  .pat-sub{
+    font-family:'Roboto',sans-serif;font-weight:200;font-style:italic;
+    font-size:14px;letter-spacing:.02em;color:var(--muted);
+    margin:14px 0 0;
+  }
+  .pat-rule{height:1px;width:54px;background:var(--hair);margin:34px auto 30px;}
+  .pat-moon{margin:0 0 4px;}
+  .pat-list{width:100%;max-width:430px;margin:6px auto 0;text-align:left;}
+  .prompt{display:flex;gap:20px;align-items:baseline;padding:13px 0;border-top:1px solid rgba(60,48,28,0.12);}
+  .prompt:first-of-type{border-top:none;}
+  .prompt .num{
+    font-family:'Pinyon Script',cursive;font-size:34px;line-height:0.8;
+    color:var(--muted);flex:0 0 auto;width:30px;text-align:center;position:relative;top:5px;
+  }
+  .prompt .q{font-family:'Roboto',sans-serif;font-weight:200;font-size:16.5px;line-height:1.5;color:var(--ink);}
+  .prompt .q .aside{display:block;font-style:italic;font-weight:200;font-size:13px;color:var(--muted);margin-top:5px;line-height:1.5;}
+  .goback{
+    appearance:none;background:none;border:none;cursor:pointer;
+    font-family:'Roboto',sans-serif;font-weight:300;font-size:12.5px;letter-spacing:.03em;
+    color:var(--muted);text-decoration:underline;text-underline-offset:3px;
+    margin-top:30px;transition:color .3s ease;
+  }
+  .goback:hover{color:var(--ink);}
+
+  /* pattern page — question title + intro + footer links */
+  .pat-question{
+    font-family:'Bodoni Moda SC','Bodoni Moda',serif;font-weight:500;
+    font-variant-caps:small-caps;
+    font-size:18px;letter-spacing:.085em;line-height:1.7;color:var(--ink);
+    margin:0 auto;max-width:none;text-align:center;
+  }
+  .pat-question .q-script{
+    font-family:'Pinyon Script',cursive;font-variant-caps:normal;
+    font-size:27px;letter-spacing:0;line-height:0;
+  }
+  .pat-moonline{
+    font-family:'Bodoni Moda SC','Bodoni Moda',serif;font-weight:500;
+    font-variant-caps:small-caps;font-size:16px;letter-spacing:.07em;color:var(--ink);
+    margin:0 0 14px;
+  }
+  .pat-intro{
+    font-family:'Roboto',sans-serif;font-weight:200;
+    font-size:14px;line-height:1.65;color:var(--ink-soft);
+    text-align:center;margin:0 auto;max-width:44ch;text-wrap:pretty;
+  }
+  .pat-actions{display:flex;gap:46px;justify-content:center;margin-top:auto;padding-top:40px;}
+  .pat-actions .goback{margin-top:0;}
+  .patreon-link{
+    font-family:'Roboto',sans-serif;font-weight:300;font-size:12.5px;letter-spacing:.03em;
+    color:var(--muted);text-decoration:underline;text-underline-offset:3px;
+    transition:color .3s ease;
+  }
+  .patreon-link:hover{color:var(--ink);}
+
+  /* ---- mobile orbit (≤760px only — desktop collage is untouched) ----
+     all plates sit on one big circle, larger than the screen, slowly
+     revolving like a moon; only the top and bottom of the ring peek in. */
+  .orbit-stage{
+    display:none;position:fixed;inset:0;overflow:hidden;
+    pointer-events:none;z-index:0;
+  }
+  @media (max-width:760px){.orbit-stage{display:block;}}
+  .orbit-dash{
+    position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+    width:calc(var(--orbit-r,52vh) * 2);height:calc(var(--orbit-r,52vh) * 2);
+    border-radius:50%;border:1.5px dashed rgba(60,48,28,0.20);
+  }
+  .orbit-ring{
+    position:absolute;left:50%;top:50%;width:0;height:0;
+    animation:orbitSpin var(--orbit-speed,90s) linear infinite;
+  }
+  .orbit-item{position:absolute;left:0;top:0;width:0;height:0;}
+  .orbit-counter{width:0;height:0;animation:orbitCounter var(--orbit-speed,90s) linear infinite;}
+  @keyframes orbitSpin{from{transform:rotate(0deg);}to{transform:rotate(360deg);}}
+  @keyframes orbitCounter{from{transform:rotate(var(--a,0deg));}to{transform:rotate(calc(var(--a,0deg) - 360deg));}}
+  .orbit-img{
+    display:block;height:auto;
+    box-shadow:0 6px 18px rgba(46,34,12,0.14);
+    animation:orbitFade 1.6s var(--ease) both;
+  }
+  @keyframes orbitFade{from{opacity:0;}to{opacity:var(--orbit-opacity,0.35);}}
+  @media (prefers-reduced-motion:reduce){
+    .orbit-ring,.orbit-counter{animation:none;}
+    .orbit-img{animation:none;opacity:var(--orbit-opacity,0.35);}
+  }
+
+  /* failsafe: if rAF never ticks (offscreen capture), reveal everything */
+  .no-anim .mo{opacity:1 !important;transform:none !important;}
+  .no-anim .orbit-img{animation:none;opacity:var(--orbit-opacity,0.35);}
+
+  @media (max-width:880px){
+    .collage-item{display:none;}
+    .collage-item.keep{display:block;}
+  }
+
+  /* ---- mobile: the pattern view is taller than a phone screen, so let the
+     column grow to its natural height and the page scroll. Landing still fills
+     exactly one screen. dvh keeps the address-bar area from clipping content. ---- */
+  @media (max-width:760px){
+    .stage{overflow:visible;}
+    .center-stage{height:auto;min-height:100vh;min-height:100dvh;padding:0 22px;}
+    .state-layer{width:100%;max-width:440px;}
+    .landing-layer{height:auto;min-height:100vh;min-height:100dvh;padding:clamp(40px,7vh,84px) 0;}
+    .pattern-layer{height:auto;min-height:100vh;min-height:100dvh;justify-content:flex-start;padding:60px 0 52px;}
+    .pat-intro{width:100% !important;max-width:42ch;}
+    .pat-list{max-width:100%;}
+    .pat-actions{gap:28px;flex-wrap:wrap;padding-top:34px;}
+  }
+  @media (max-width:560px){
+    .collage-item{display:none !important;}
+    .pat-question{font-size:17px;line-height:1.6;}
+    .pat-question br{display:none;}
+    .pat-intro br{display:none;}
+    .prompt{gap:16px;padding:11px 0;}
+    .sign{font-size:clamp(74px,19vw,110px);}
+  }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/framer-motion@11.11.17/dist/framer-motion.js"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script type="text/babel" data-presets="react" src="tweaks-panel.jsx"></script>
+<script type="text/babel" data-presets="react">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// framer-motion v11 emits one false-positive React "key" warning from its own
+// internals (our mapped lists are correctly keyed). Silence just that message.
+(function () {
+  const _err = console.error;
+  console.error = function () {
+    if (typeof arguments[0] === 'string' && arguments[0].indexOf('unique "key" prop') !== -1) return;
+    return _err.apply(console, arguments);
+  };
+})();
+
+const { useState, useEffect, useRef } = React;
+const { motion, AnimatePresence } = window.Motion;
+const ease = [0.22, 0.61, 0.36, 1];
+
+const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
+  "lImageSize": 1.2,
+  "lSpread": 0.5,
+  "lVSpread": 4,
+  "pImageSize": 0.75,
+  "pSpread": -9,
+  "pVSpread": 7,
+  "zoom": 1.8,
+  "mSize": 1.6,
+  "mRadius": 57,
+  "mOpacity": 0.35,
+  "mSpeed": 150
+}/*EDITMODE-END*/;
+
+const COLLAGE = [
+{ src: 'images/lunar-phases.webp', left: '4.5%', top: '12%', w: 18, rot: -1.5, depth: 0.5, keep: true },
+{ src: 'images/flammarion.webp', left: '0.5%', top: '52%', w: 16, rot: -2.5, depth: 0.9, nudgeY: -180, z: 5 },
+{ src: 'images/mercury-figure2.webp', left: '1.5%', top: '64%', w: 11, rot: 1.5, depth: 1.0, nudgeY: 24, z: 11 },
+{ src: 'images/drawing-by-reflection.webp', left: '20.5%', top: '37%', w: 10, rot: 1.5, depth: 1.5, keep: true, z: 50 },
+{ src: 'images/benda-arch.webp', left: '13%', top: '67%', w: 13.5, rot: 0.5, depth: 1.2, nudgeY: -82, z: 10 },
+{ src: 'images/earth-from-moon.webp', right: '4%', top: '10%', w: 11, rot: 1.5, depth: 0.7, keep: true },
+{ src: 'images/mirror-of-venus.webp', right: '15.5%', top: '33%', w: 13, rot: -1, depth: 1.3 },
+{ src: 'images/celestial-influence.webp', right: '16%', top: '50%', w: 11, rot: 1, depth: 1.0 },
+{ src: 'images/la-lune.webp', right: '2.5%', top: '41%', w: 10, rot: 2, depth: 1.6, keep: true },
+{ src: 'images/voila.webp', right: '3.5%', top: '62%', w: 10, rot: -1.5, depth: 1.1 }];
+
+
+const PROMPTS = [
+{ q: 'What emotion(s) is loud today?', aside: 'You can keep in mind the “theme,” or flavour, associated with each moon sign.' },
+{ q: 'What story is my mind building around that emotion?' },
+{ q: 'What does my body actually need?' },
+{ q: 'Where am I explaining, performing, hiding, clinging, or bracing?' },
+{ q: 'What old pattern is asking for my attention?' },
+{ q: 'What would self-abandonment look like today? Self-loyalty?' }];
+
+
+// ── lunar position → tropical zodiac sign ──────────────────────────
+// Each sign carries the emotional "theme" the Moon's passage colours.
+const SIGNS = [
+{ name: 'Aries', theme: 'Initiative' },
+{ name: 'Taurus', theme: 'Steadiness' },
+{ name: 'Gemini', theme: 'Communication' },
+{ name: 'Cancer', theme: 'Tenderness' },
+{ name: 'Leo', theme: 'Expression' },
+{ name: 'Virgo', theme: 'Discernment' },
+{ name: 'Libra', theme: 'Harmony' },
+{ name: 'Scorpio', theme: 'Intensity' },
+{ name: 'Sagittarius', theme: 'Expansion' },
+{ name: 'Capricorn', theme: 'Discipline' },
+{ name: 'Aquarius', theme: 'Detachment' },
+{ name: 'Pisces', theme: 'Surrender' }];
+
+// Geocentric ecliptic longitude of the Moon (Schlyter's method, incl. the
+// twelve dominant perturbations) — accurate to a couple arc-minutes, far
+// finer than the 30° we need to name a sign.
+function moonEclipticLongitude(date) {
+  const rad = Math.PI / 180;
+  const rev = (x) => (x % 360 + 360) % 360;
+  // days since 2000 Jan 0.0 UT  (JD 2451543.5)
+  const d = date.getTime() / 86400000 + 2440587.5 - 2451543.5;
+  const N = 125.1228 - 0.0529538083 * d; // ascending node
+  const i = 5.1454;
+  const w = 318.0634 + 0.1643573223 * d; // arg. of perigee
+  const a = 60.2666,e = 0.054900;
+  const M = rev(115.3654 + 13.0649929509 * d); // Moon mean anomaly
+  const Ms = rev(356.0470 + 0.9856002585 * d); // Sun mean anomaly
+  const ws = 282.9404 + 4.70935e-5 * d;
+  // eccentric anomaly (one Newton step is ample for the Moon's small e)
+  let E = M + 180 / Math.PI * e * Math.sin(M * rad) * (1 + e * Math.cos(M * rad));
+  E = E - (E - 180 / Math.PI * e * Math.sin(E * rad) - M) / (1 - e * Math.cos(E * rad));
+  const xv = a * (Math.cos(E * rad) - e);
+  const yv = a * (Math.sqrt(1 - e * e) * Math.sin(E * rad));
+  const v = Math.atan2(yv, xv) / rad;
+  const r = Math.sqrt(xv * xv + yv * yv);
+  const xh = r * (Math.cos(N * rad) * Math.cos((v + w) * rad) - Math.sin(N * rad) * Math.sin((v + w) * rad) * Math.cos(i * rad));
+  const yh = r * (Math.sin(N * rad) * Math.cos((v + w) * rad) + Math.cos(N * rad) * Math.sin((v + w) * rad) * Math.cos(i * rad));
+  let lon = Math.atan2(yh, xh) / rad;
+  const Lm = N + w + M,Ls = ws + Ms;
+  const D = Lm - Ls,F = Lm - N;
+  lon +=
+  -1.274 * Math.sin((M - 2 * D) * rad) +
+  0.658 * Math.sin(2 * D * rad) -
+  0.186 * Math.sin(Ms * rad) -
+  0.059 * Math.sin((2 * M - 2 * D) * rad) -
+  0.057 * Math.sin((M - 2 * D + Ms) * rad) +
+  0.053 * Math.sin((M + 2 * D) * rad) +
+  0.046 * Math.sin((2 * D - Ms) * rad) +
+  0.041 * Math.sin((M - Ms) * rad) -
+  0.035 * Math.sin(D * rad) -
+  0.031 * Math.sin((M + Ms) * rad) -
+  0.015 * Math.sin((2 * F - 2 * D) * rad) +
+  0.011 * Math.sin((M - 4 * D) * rad);
+  return rev(lon);
+}
+
+function currentMoon(date) {
+  const lon = moonEclipticLongitude(date);
+  const index = Math.floor(lon / 30) % 12;
+  return { ...SIGNS[index], index, lon };
+}
+
+// long, quiet date stamp in the browser's own timezone, e.g.
+// "June 13th · 6:06 am"
+function formatStamp(date) {
+  const months = ['January', 'February', 'March', 'April', 'May', 'June',
+  'July', 'August', 'September', 'October', 'November', 'December'];
+  const day = date.getDate();
+  const ord = day % 10 === 1 && day !== 11 ? 'st' :
+  day % 10 === 2 && day !== 12 ? 'nd' :
+  day % 10 === 3 && day !== 13 ? 'rd' : 'th';
+  let h = date.getHours();
+  const ampm = h < 12 ? 'am' : 'pm';
+  h = h % 12 || 12;
+  const mm = String(date.getMinutes()).padStart(2, '0');
+  return `${months[date.getMonth()]} ${day}${ord} · ${h}:${mm} ${ampm}`;
+}
+
+// the browser's timezone abbreviation, e.g. "GMT+2" / "PDT"
+function getTimezone(date) {
+  try {
+    const parts = new Intl.DateTimeFormat('en-US', { timeZoneName: 'short' }).formatToParts(date);
+    return (parts.find((p) => p.type === 'timeZoneName') || {}).value || '';
+  } catch (e) {
+    return '';
+  }
+}
+
+// size the script-font sign so even "Sagittarius" stays on one line
+function signSize(name) {
+  return (name.length <= 7 ? 100 : Math.round(100 * 7 / name.length)) + 'px';
+}
+
+// reveal content if requestAnimationFrame never ticks (e.g. offscreen capture)
+function useRafFailsafe() {
+  useEffect(() => {
+    let fired = false;
+    requestAnimationFrame(() => {fired = true;});
+    const t = setTimeout(() => {if (!fired) document.documentElement.classList.add('no-anim');}, 700);
+    return () => clearTimeout(t);
+  }, []);
+}
+
+function CollageItem({ it, i, m, zoom, t }) {
+  const onLeft = it.left !== undefined;
+  // ── box geometry is FIXED at the landing layout and never animates ──
+  // The whole landing→zoom morph (size + reposition) is expressed as a single
+  // GPU transform on the inner wrapper. Animating `width`/`top`/`left` instead
+  // forces the browser to re-decode & re-sample each plate every frame, which
+  // is what made the engravings shimmer/jitter until they settled. `scale`
+  // reuses one rasterised texture, so the move is now perfectly smooth.
+  const basePos = parseFloat(onLeft ? it.left : it.right);
+  const baseTop = parseFloat(it.top);
+  const boxEdge = basePos - t.lSpread;                       // % (landing)
+  const boxTop = 40 + (baseTop - 40) * (1 + t.lVSpread / 18); // % (landing)
+  const pos = { top: boxTop + '%', [onLeft ? 'left' : 'right']: boxEdge + '%' };
+
+  // parallax follows the cursor; damped hard while zoomed (plates are ~2×, so
+  // a given px of travel reads doubled — tiny jitter looked like shaking).
+  const par = zoom ? 5 : 26;
+  const tx = -m.x * it.depth * par,ty = -m.y * it.depth * par + (it.nudgeY || 0);
+
+  // ── zoom delta, transform-only ──
+  // size: landing box × (pattern size / landing size) × zoom magnify
+  const scale = zoom ? t.pImageSize / t.lImageSize * (t.zoom + it.depth * 0.28) : 1;
+  // reposition landing-edge% → pattern-edge%, carried as viewport units so the
+  // box itself stays put; left/right items move toward opposite signs.
+  const edgeDeltaVw = t.lSpread - t.pSpread;
+  const dxVw = zoom ? (onLeft ? edgeDeltaVw : -edgeDeltaVw) : 0;
+  const dyVh = zoom ? (baseTop - 40) * (t.pVSpread - t.lVSpread) / 18 : 0;
+  // shove toward the nearest side so the centre clears and plates spill off-edge
+  const pushX = zoom ? (onLeft ? -1 : 1) * (60 + it.depth * 70) : 0;
+  const pushY = zoom ? (it.depth - 0.9) * 26 : 0;
+  const origin = onLeft ? 'right center' : 'left center';
+  return (
+    <div className={'collage-item' + (it.keep ? ' keep' : '')}
+    style={{ ...pos, width: it.w * t.lImageSize + 'vw', zIndex: it.z || 'auto',
+      transform: `translate3d(${tx}px,${ty}px,0)`,
+      backfaceVisibility: 'hidden',
+      transition: 'transform .5s var(--ease)' }}>
+      <div style={{ transform: `translate(${dxVw}vw,${dyVh}vh) translate3d(${pushX}px,${pushY}px,0) scale(${scale})`,
+        transformOrigin: origin, willChange: 'transform', backfaceVisibility: 'hidden',
+        transition: 'transform 1.9s cubic-bezier(.62,.0,.2,1)' }}>
+        <motion.img className="mo collage-img" src={it.src} alt="" draggable="false" decoding="async"
+        style={it.deepShadow ? { boxShadow: '0 16px 40px rgba(46,34,12,0.30), 0 4px 10px rgba(46,34,12,0.20)' } : undefined}
+        initial={{ opacity: 0, y: 18, rotate: it.rot }}
+        animate={{ opacity: 1, y: 0, rotate: it.rot }}
+        transition={{ duration: 1.3, ease, delay: 0.25 + i * 0.1 }} />
+      </div>
+    </div>);
+
+}
+
+// tracks a media query without re-rendering desktop logic on mobile (and
+// vice-versa) — the two collage layers are completely independent.
+function useMediaQuery(query) {
+  const [matches, setMatches] = useState(() => window.matchMedia(query).matches);
+  useEffect(() => {
+    const mq = window.matchMedia(query);
+    const onChange = (e) => setMatches(e.matches);
+    mq.addEventListener('change', onChange);
+    return () => mq.removeEventListener('change', onChange);
+  }, [query]);
+  return matches;
+}
+
+// ── mobile-only: every plate on one slow-revolving circle, bigger than the
+// screen, so images just peek in at the top and bottom edges ──
+function MobileOrbit({ t }) {
+  const n = COLLAGE.length;
+  return (
+    <div className="orbit-stage" aria-hidden="true"
+    style={{ '--orbit-r': t.mRadius + 'vh', '--orbit-speed': t.mSpeed + 's', '--orbit-opacity': t.mOpacity }}>
+      <div className="orbit-dash"></div>
+      <div className="orbit-ring">
+        {COLLAGE.map((it, i) => {
+          const a = i * 360 / n;
+          return (
+            <div className="orbit-item" key={i}
+            style={{ transform: `rotate(${a}deg) translateY(calc(var(--orbit-r) * -1))` }}>
+              <div className="orbit-counter" style={{ '--a': -a + 'deg' }}>
+                <img className="orbit-img" src={it.src} alt="" draggable="false" decoding="async"
+                style={{ width: it.w * 7 * t.mSize + 'px',
+                  transform: `translate(-50%,-50%) rotate(${it.rot}deg)`,
+                  animationDelay: 0.15 * i + 's' }} />
+              </div>
+            </div>);
+        })}
+      </div>
+    </div>);
+}
+
+function Collage({ zoom, t }) {
+  const [m, setM] = useState({ x: 0, y: 0 });
+  const raf = useRef(0);
+  useEffect(() => {
+    const onMove = (e) => {
+      cancelAnimationFrame(raf.current);
+      raf.current = requestAnimationFrame(() => {
+        setM({ x: e.clientX / window.innerWidth - 0.5, y: e.clientY / window.innerHeight - 0.5 });
+      });
+    };
+    window.addEventListener('mousemove', onMove);
+    return () => window.removeEventListener('mousemove', onMove);
+  }, []);
+  return (
+    <React.Fragment>
+      {COLLAGE.map((it, i) =>
+      <CollageItem key={i} it={it} i={i} m={m} zoom={zoom} t={t} />
+      )}
+    </React.Fragment>);
+
+}
+
+// ── motion vocabulary ──────────────────────────────────────────────
+// landing text rises in on load and disperses upward (blur + drift);
+// the pattern text rises up from below to take its place.
+const groupParent = {
+  initial: {},
+  animate: { transition: { staggerChildren: 0.1, delayChildren: 0.12 } },
+  exit: { transition: { staggerChildren: 0.07 } } };
+
+const fadeUp = {
+  initial: { opacity: 0, y: 16, filter: 'blur(4px)' },
+  animate: { opacity: 1, y: 0, filter: 'blur(0px)', transition: { duration: 1.0, ease } },
+  exit: { opacity: 0, y: -24, filter: 'blur(7px)', transition: { duration: 0.7, ease } } };
+
+const riseParent = {
+  initial: {},
+  animate: { transition: { staggerChildren: 0.09, delayChildren: 0.22 } },
+  exit: { transition: { staggerChildren: 0.05 } } };
+
+const riseUp = {
+  initial: { opacity: 0, y: 52, filter: 'blur(5px)' },
+  animate: { opacity: 1, y: 0, filter: 'blur(0px)', transition: { duration: 1.0, ease } },
+  exit: { opacity: 0, y: 40, filter: 'blur(5px)', transition: { duration: 0.55, ease } } };
+
+const listStagger = {
+  initial: {},
+  animate: { transition: { staggerChildren: 0.07, delayChildren: 0.06 } },
+  exit: {} };
+
+function TrackWordmark() {
+  return (
+    <React.Fragment>
+      <span className="tp-caps" style={{ fontSize: "23px", fontFamily: "\"Pinyon Script\"" }}></span>
+      <span className="tp-script" style={{ fontWeight: "100", fontFamily: "\"Pinyon Script\"", fontSize: "24px" }}>Track the patterns</span>
+    </React.Fragment>);
+
+}
+
+function Landing({ onOpen, stamp, tz, moon }) {
+  const [pressing, setPressing] = useState(false);
+  const handleOpen = () => {
+    if (pressing) return;
+    setPressing(true);
+    // let the ripple bloom before the page lifts away
+    setTimeout(onOpen, 300);
+  };
+  const trackGlow = (e) => {
+    const el = e.currentTarget;
+    const r = el.getBoundingClientRect();
+    el.style.setProperty('--mx', (e.clientX - r.left) / r.width * 100 + '%');
+    el.style.setProperty('--my', (e.clientY - r.top) / r.height * 100 + '%');
+  };
+  return (
+    <motion.div className="state-layer landing-layer" variants={groupParent}
+    initial="initial" animate="animate" exit="exit">
+      <motion.div variants={fadeUp} style={{ margin: "0px" }}>
+        <div className="eyebrow" style={{ fontWeight: "300", fontSize: "14px", lineHeight: "0.9" }}>Date and time</div>
+        <div className="datetime" style={{ marginTop: 8, fontWeight: "400", fontSize: "23px", lineHeight: "0.9", letterSpacing: "0.5px" }}>{stamp}</div>
+        {tz && <div className="eyebrow" style={{ fontWeight: "300", fontSize: "14px", lineHeight: "0.9", marginTop: 10, marginBottom: 0 }}>{tz}</div>}
+      </motion.div>
+      <motion.div className="landing-mid">
+        <motion.div variants={fadeUp}>
+          <h1 className="moon-line" style={{ fontSize: "37px", letterSpacing: "0.5px" }}>the <span className="script" style={{ fontSize: "60px" }}>Moon</span> is in</h1>
+          <div className="sign" style={{ lineHeight: 0.9, fontSize: signSize(moon.name), padding: "0px 0px 20px" }}>{moon.name}</div>
+        </motion.div>
+        <motion.div variants={fadeUp}>
+          <div className="eyebrow" style={{ fontWeight: 300, lineHeight: "0.9" }}>Theme</div>
+          <div className="theme" style={{ marginTop: 8, fontWeight: "400", lineHeight: "0.9", fontSize: "23px", letterSpacing: "0.5px" }}>{moon.theme}</div>
+        </motion.div>
+      </motion.div>
+      <motion.button variants={fadeUp} className={'track-pill' + (pressing ? ' is-pressing' : '')}
+      whileHover={{ y: -1.5 }} whileTap={{ scale: 0.985, y: 1 }}
+      transition={{ type: 'spring', stiffness: 320, damping: 26 }}
+      onMouseMove={trackGlow}
+      style={{ marginTop: 0, opacity: "1", backgroundColor: "rgba(255, 255, 255, 0)", borderRadius: "50px", borderWidth: "0px 1px 4px 0px", borderColor: "rgb(247, 244, 231)" }}
+      onClick={handleOpen} aria-label="Track the patterns">
+        <TrackWordmark />
+        <span className="pill-trace" aria-hidden="true"></span>
+        <span className="pill-bloom" aria-hidden="true"></span>
+        <span className="pill-glow" aria-hidden="true"></span>
+        <span className="pill-ripple" aria-hidden="true"></span>
+      </motion.button>
+    </motion.div>);
+
+}
+
+function Pattern({ onBack, moon }) {
+  return (
+    <motion.div className="state-layer pattern-layer" variants={riseParent}
+    initial="initial" animate="animate" exit="exit">
+      <motion.div variants={riseUp}>
+        <h2 className="pat-question" style={{ letterSpacing: "0.5px" }}>Can you <span className="q-script">Observe</span> yourself consistently <br />enough to notice <span className="q-script">Patterns</span>?</h2>
+      </motion.div>
+      <motion.div variants={riseUp} className="pat-rule"></motion.div>
+      <motion.div variants={riseUp}>
+        <div className="pat-moonline" style={{ letterSpacing: "0.5px" }}>the Moon is in {moon.name}.</div>
+        <p className="pat-intro" style={{ width: "350px" }}>Simply witness, pay attention and lovingly observe. <br />The point is to become a little more intimate with your inner weather. Patterns are a lot easier to spot when you're not IN them. Oftentimes, we don't notice recurring emotional loops until we've seen them loads of times.</p>
+      </motion.div>
+      <motion.div variants={riseUp} className="pat-rule"></motion.div>
+      <motion.div className="pat-list" variants={listStagger}>
+        {PROMPTS.map((p, i) =>
+        <motion.div className="prompt" key={i} variants={riseUp}>
+            <div className="num">{i + 1}</div>
+            <div className="q" style={{ fontSize: "14px" }}>{p.q}{p.aside && <span className="aside">{p.aside}</span>}</div>
+          </motion.div>
+        )}
+      </motion.div>
+      <motion.div variants={riseUp} className="pat-actions">
+        <button className="goback" onClick={onBack}>Go back</button>
+        <a className="patreon-link" href="https://www.patreon.com/posts/join-me-for-160459353" target="_blank" rel="noopener noreferrer">See the full post on Patreon</a>
+      </motion.div>
+    </motion.div>);
+
+}
+
+function App() {
+  useRafFailsafe();
+  const [view, setView] = useState('landing');
+  const [t, setTweak] = useTweaks(TWEAK_DEFAULTS);
+  const [now, setNow] = useState(() => new Date());
+  // keep the clock (and, across sign boundaries, the Moon) live
+  useEffect(() => {
+    const id = setInterval(() => setNow(new Date()), 20000);
+    return () => clearInterval(id);
+  }, []);
+  const moon = currentMoon(now);
+  const stamp = formatStamp(now);
+  const tz = getTimezone(now);
+  const isMobile = useMediaQuery('(max-width: 760px)');
+  return (
+    <div className="stage">
+      {isMobile ?
+      <MobileOrbit t={t} /> :
+      <Collage zoom={view === 'pattern'} t={t} />}
+      <div className="center-stage">
+        <AnimatePresence initial={true}>
+          {view === 'landing' ?
+          <Landing key="landing" onOpen={() => setView('pattern')} stamp={stamp} tz={tz} moon={moon} /> :
+          <Pattern key="pattern" onBack={() => setView('landing')} moon={moon} />}
+        </AnimatePresence>
+      </div>
+      <TweaksPanel title="Tweaks">
+        <TweakSection label="Landing — photos" />
+        <TweakSlider label="Image size" value={t.lImageSize} min={0.6} max={1.8} step={0.05} unit="×"
+        onChange={(v) => setTweak('lImageSize', v)} />
+        <TweakSlider label="Edge spread" value={t.lSpread} min={-10} max={14} step={0.5} unit="%"
+        onChange={(v) => setTweak('lSpread', v)} />
+        <TweakSlider label="Vertical spread" value={t.lVSpread} min={-10} max={12} step={0.5}
+        onChange={(v) => setTweak('lVSpread', v)} />
+        <TweakSection label="Track the patterns — photos" />
+        <TweakSlider label="Image size" value={t.pImageSize} min={0.6} max={1.8} step={0.05} unit="×"
+        onChange={(v) => {setTweak('pImageSize', v);setView('pattern');}} />
+        <TweakSlider label="Edge spread" value={t.pSpread} min={-10} max={14} step={0.5} unit="%"
+        onChange={(v) => {setTweak('pSpread', v);setView('pattern');}} />
+        <TweakSlider label="Vertical spread" value={t.pVSpread} min={-10} max={12} step={0.5}
+        onChange={(v) => {setTweak('pVSpread', v);setView('pattern');}} />
+        <TweakSlider label="Zoom intensity" value={t.zoom} min={1.1} max={2.4} step={0.05} unit="×"
+        onChange={(v) => {setTweak('zoom', v);setView('pattern');}} />
+        <TweakSection label="Mobile — orbit" />
+        <TweakSlider label="Image size" value={t.mSize} min={0.5} max={2} step={0.05} unit="×"
+        onChange={(v) => setTweak('mSize', v)} />
+        <TweakSlider label="Ring radius" value={t.mRadius} min={42} max={75} step={1} unit="vh"
+        onChange={(v) => setTweak('mRadius', v)} />
+        <TweakSlider label="Image opacity" value={t.mOpacity} min={0.1} max={1} step={0.05}
+        onChange={(v) => setTweak('mOpacity', v)} />
+        <TweakSlider label="Revolution (sec)" value={t.mSpeed} min={30} max={240} step={5}
+        onChange={(v) => setTweak('mSpeed', v)} />
+      </TweaksPanel>
+    </div>);
+
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>
