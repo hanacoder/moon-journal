@@ -2,8 +2,14 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>The Moon Journal</title>
+<template id="__bundler_thumbnail" data-bg-color="#FFFEEE">
+  <svg viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg">
+    <rect width="400" height="300" fill="#FFFEEE"/>
+    <circle cx="200" cy="120" r="55" fill="#262019" opacity="0.15"/>
+    <circle cx="200" cy="120" r="50" fill="none" stroke="#262019" stroke-width="1.5" opacity="0.3"/>
+    <text x="200" y="200" font-family="serif" font-size="28" text-anchor="middle" fill="#262019" opacity="0.8">Moon Journal</text>
+  </svg>
+</template>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;0,6..96,500;0,6..96,600;1,6..96,400;1,6..96,500&family=Bodoni+Moda+SC:ital,opsz,wght@0,6..96,400;0,6..96,500;0,6..96,600;1,6..96,400&family=Pinyon+Script&family=Roboto:ital,wght@0,100;0,200;0,300;1,100;1,200;1,300&display=swap" rel="stylesheet">
@@ -186,8 +192,24 @@
     animation:shineCircle 3.4s linear infinite;
   }
   @keyframes shineCircle{to{--shine-angle:360deg;}}
+  /* always-on inner halo — a faint resting glow plus a soft bloom that sweeps
+     around the inside of the pill, in sync with the border shine */
+  .pill-halo{
+    position:absolute;inset:-4px;border-radius:inherit;pointer-events:none;
+    background:
+      conic-gradient(from var(--shine-angle) at 50% 50%,
+        rgba(255,250,235,0) 0deg,
+        rgba(255,250,235,0) 48deg,
+        rgba(255,250,235,0.38) 88deg,
+        rgba(255,250,235,0) 128deg,
+        rgba(255,250,235,0) 360deg),
+      radial-gradient(85% 95% at 50% 42%, rgba(255,250,235,0.16), rgba(255,250,235,0) 78%);
+    filter:blur(10px);
+    animation:shineCircle 3.4s linear infinite;
+  }
+  .track-pill:hover .pill-halo{filter:blur(13px);}
   @media (prefers-reduced-motion:reduce){
-    .track-pill:hover,.track-pill:hover::before,.track-pill.is-pressing .pill-ripple,.pill-trace{animation:none;}
+    .track-pill:hover,.track-pill:hover::before,.track-pill.is-pressing .pill-ripple,.pill-trace,.pill-halo{animation:none;}
   }
 
   /* ---- pattern state ---- */
@@ -284,6 +306,36 @@
   .no-anim .mo{opacity:1 !important;transform:none !important;}
   .no-anim .orbit-img{animation:none;opacity:var(--orbit-opacity,0.35);}
 
+  /* ---- shorter desktop windows: the pattern page is taller than the
+     viewport, so compress paddings/type to fit — and as a final failsafe
+     let the layer scroll (scrollbar hidden; wheel/trackpad still works).
+     Normal-height desktops are completely unaffected. ---- */
+  @media (min-width:761px) and (max-height:860px){
+    .pattern-layer{
+      padding:42px 0 36px;
+      overflow-y:auto;
+      scrollbar-width:none;
+    }
+    .pattern-layer::-webkit-scrollbar{display:none;}
+    .pat-rule{margin:22px auto 20px;}
+    .pat-intro{line-height:1.55;}
+    .prompt{padding:10px 0;}
+    .prompt .num{font-size:30px;}
+    .pat-actions{padding-top:24px;}
+  }
+  @media (min-width:761px) and (max-height:720px){
+    .pattern-layer{padding:30px 0 28px;}
+    .pat-question{font-size:16px;line-height:1.55;}
+    .pat-question .q-script{font-size:24px;}
+    .pat-rule{margin:15px auto 13px;}
+    .pat-moonline{margin-bottom:10px;}
+    .pat-intro{font-size:13px;}
+    .prompt{padding:8px 0;gap:16px;}
+    .prompt .num{font-size:27px;}
+    .prompt .q .aside{margin-top:3px;}
+    .pat-actions{padding-top:18px;}
+  }
+
   @media (max-width:880px){
     .collage-item{display:none;}
     .collage-item.keep{display:block;}
@@ -340,6 +392,7 @@
 
 
 
+
 // framer-motion v11 emits one false-positive React "key" warning from its own
 // internals (our mapped lists are correctly keyed). Silence just that message.
 (function () {
@@ -366,7 +419,7 @@ const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
   "mRadius": 57,
   "mOpacity": 0.35,
   "mSpeed": 150
-}/*EDITMODE-END*/;
+} /*EDITMODE-END*/;
 
 const COLLAGE = [
 { src: 'images/lunar-phases.webp', left: '4.5%', top: '12%', w: 18, rot: -1.5, depth: 0.5, keep: true },
@@ -506,7 +559,7 @@ function CollageItem({ it, i, m, zoom, t }) {
   // reuses one rasterised texture, so the move is now perfectly smooth.
   const basePos = parseFloat(onLeft ? it.left : it.right);
   const baseTop = parseFloat(it.top);
-  const boxEdge = basePos - t.lSpread;                       // % (landing)
+  const boxEdge = basePos - t.lSpread; // % (landing)
   const boxTop = 40 + (baseTop - 40) * (1 + t.lVSpread / 18); // % (landing)
   const pos = { top: boxTop + '%', [onLeft ? 'left' : 'right']: boxEdge + '%' };
 
@@ -521,7 +574,7 @@ function CollageItem({ it, i, m, zoom, t }) {
   // reposition landing-edge% → pattern-edge%, carried as viewport units so the
   // box itself stays put; left/right items move toward opposite signs.
   const edgeDeltaVw = t.lSpread - t.pSpread;
-  const dxVw = zoom ? (onLeft ? edgeDeltaVw : -edgeDeltaVw) : 0;
+  const dxVw = zoom ? onLeft ? edgeDeltaVw : -edgeDeltaVw : 0;
   const dyVh = zoom ? (baseTop - 40) * (t.pVSpread - t.lVSpread) / 18 : 0;
   // shove toward the nearest side so the centre clears and plates spill off-edge
   const pushX = zoom ? (onLeft ? -1 : 1) * (60 + it.depth * 70) : 0;
@@ -680,9 +733,10 @@ function Landing({ onOpen, stamp, tz, moon }) {
       whileHover={{ y: -1.5 }} whileTap={{ scale: 0.985, y: 1 }}
       transition={{ type: 'spring', stiffness: 320, damping: 26 }}
       onMouseMove={trackGlow}
-      style={{ marginTop: 0, opacity: "1", backgroundColor: "rgba(255, 255, 255, 0)", borderRadius: "50px", borderWidth: "0px 1px 4px 0px", borderColor: "rgb(247, 244, 231)" }}
+      style={{ marginTop: 0, opacity: "1", backgroundColor: "rgba(255, 255, 255, 0)", borderRadius: "50px", borderColor: "rgb(247, 244, 231)", borderWidth: "0px 1px 3px 0px" }}
       onClick={handleOpen} aria-label="Track the patterns">
         <TrackWordmark />
+        <span className="pill-halo" aria-hidden="true"></span>
         <span className="pill-trace" aria-hidden="true"></span>
         <span className="pill-bloom" aria-hidden="true"></span>
         <span className="pill-glow" aria-hidden="true"></span>
