@@ -10,8 +10,6 @@
     <text x="200" y="200" font-family="serif" font-size="28" text-anchor="middle" fill="#262019" opacity="0.8">Moon Journal</text>
   </svg>
 </template>
-<script data-goatcounter="https://moonjournal.goatcounter.com/count"
-        async src="//gc.zgo.at/count.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;0,6..96,500;0,6..96,600;1,6..96,400;1,6..96,500&family=Bodoni+Moda+SC:ital,opsz,wght@0,6..96,400;0,6..96,500;0,6..96,600;1,6..96,400&family=Pinyon+Script&family=Roboto:ital,wght@0,100;0,200;0,300;1,100;1,200;1,300&display=swap" rel="stylesheet">
@@ -128,8 +126,35 @@
     background:radial-gradient(60% 100% at 50% 100%, rgba(255,249,230,0.28), rgba(255,249,230,0) 72%);
     opacity:0;pointer-events:none;transition:opacity .6s var(--ease);
   }
-  .track-pill .tp-caps{font-size:21px;line-height:0.6;}
-  .track-pill .tp-script{font-size:30px;line-height:0.6;position:relative;top:3px;}
+  .track-pill .tp-caps{font-size:21px;line-height:0.6;position:relative;z-index:3;}
+  .track-pill .tp-script{font-size:30px;line-height:0.6;position:relative;top:3px;z-index:3;}
+  /* polished-mirror fill: a glassy reflective sheen with a bright diagonal
+     light band that slowly drifts across, the way light slides over a mirror */
+  .pill-mirror{
+    position:absolute;inset:0;border-radius:inherit;pointer-events:none;z-index:1;
+    background:
+      linear-gradient(125deg,
+        rgba(255,255,255,0) 18%,
+        rgba(255,255,255,0.55) 32%,
+        rgba(255,255,255,0.9) 42%,
+        rgba(255,255,255,0.35) 50%,
+        rgba(255,255,255,0) 60%) ,
+      linear-gradient(160deg,
+        rgba(255,253,244,0.6) 0%,
+        rgba(255,250,235,0.18) 38%,
+        rgba(244,238,222,0.10) 60%,
+        rgba(255,253,244,0.42) 100%);
+    background-size:240% 100%, 100% 100%;
+    background-position:0% 0%, 0 0;
+    background-repeat:no-repeat;
+    mix-blend-mode:screen;
+    animation:mirrorSweep 6.5s ease-in-out infinite;
+  }
+  @keyframes mirrorSweep{
+    0%{background-position:-60% 0%, 0 0;}
+    100%{background-position:160% 0%, 0 0;}
+  }
+  .track-pill:hover .pill-mirror{animation-duration:3.4s;}
   .track-pill:hover{
     border-color:rgba(255,252,238,1) !important;
     animation:moonBreath 3.6s ease-in-out infinite;
@@ -211,7 +236,7 @@
   }
   .track-pill:hover .pill-halo{filter:blur(13px);}
   @media (prefers-reduced-motion:reduce){
-    .track-pill:hover,.track-pill:hover::before,.track-pill.is-pressing .pill-ripple,.pill-trace,.pill-halo{animation:none;}
+    .track-pill:hover,.track-pill:hover::before,.track-pill.is-pressing .pill-ripple,.pill-trace,.pill-halo,.pill-mirror{animation:none;}
   }
 
   /* ---- pattern state ---- */
@@ -737,6 +762,7 @@ function Landing({ onOpen, stamp, tz, moon }) {
       onMouseMove={trackGlow}
       style={{ marginTop: 0, opacity: "1", backgroundColor: "rgba(255, 255, 255, 0)", borderRadius: "50px", borderColor: "rgb(247, 244, 231)", borderWidth: "0px 1px 3px 0px" }}
       onClick={handleOpen} aria-label="Track the patterns">
+        <span className="pill-mirror" aria-hidden="true"></span>
         <TrackWordmark />
         <span className="pill-halo" aria-hidden="true"></span>
         <span className="pill-trace" aria-hidden="true"></span>
