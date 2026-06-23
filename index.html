@@ -186,6 +186,7 @@
     background:radial-gradient(120px circle at var(--mx,50%) var(--my,50%),
       rgba(255,253,240,0.95), rgba(255,249,228,0) 60%);
     -webkit-mask:linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask:linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
     -webkit-mask-composite:xor;mask-composite:exclude;
     filter:blur(4px);
   }
@@ -196,6 +197,7 @@
     background:radial-gradient(110px circle at var(--mx,50%) var(--my,50%),
       rgba(255,254,245,1), rgba(255,249,228,0.55) 32%, rgba(255,249,228,0) 60%);
     -webkit-mask:linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask:linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
     -webkit-mask-composite:xor;mask-composite:exclude;
   }
   .track-pill:hover .pill-glow,.track-pill.is-pressing .pill-glow{opacity:1;}
@@ -214,6 +216,7 @@
       rgba(255,255,255,0) 118deg,
       rgba(255,255,255,0) 360deg);
     -webkit-mask:linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask:linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
     -webkit-mask-composite:xor;mask-composite:exclude;
     filter:drop-shadow(0 0 5px rgba(255,255,255,0.95)) drop-shadow(0 0 2px rgba(255,255,255,1));
     animation:shineCircle 3.4s linear infinite;
@@ -399,6 +402,7 @@
 <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
 <script type="text/babel" data-presets="react" src="tweaks-panel.jsx"></script>
 <script type="text/babel" data-presets="react">
+
 
 
 
@@ -760,7 +764,7 @@ function Landing({ onOpen, stamp, tz, moon }) {
       whileHover={{ y: -1.5 }} whileTap={{ scale: 0.985, y: 1 }}
       transition={{ type: 'spring', stiffness: 320, damping: 26 }}
       onMouseMove={trackGlow}
-      style={{ marginTop: 0, opacity: "1", backgroundColor: "rgba(255, 255, 255, 0)", borderRadius: "50px", borderColor: "rgb(247, 244, 231)", borderWidth: "0px 1px 3px 0px" }}
+      style={{ marginTop: 0, opacity: "1", backgroundColor: "rgba(255, 255, 255, 0)", borderRadius: "50px", borderColor: "rgb(247, 244, 231)", borderWidth: "0px" }}
       onClick={handleOpen} aria-label="Track the patterns">
         <span className="pill-mirror" aria-hidden="true"></span>
         <TrackWordmark />
